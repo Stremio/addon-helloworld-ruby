@@ -21,9 +21,9 @@ gem install bundler
 
 ## Basic tutorial on how to re-create this add-on step by step
 
-### Step 1: init a project
+## Step 1: init a project
 
-#### Pre-requisites: git, ruby, rubygems
+### Pre-requisites: git, ruby, rubygems
 
 > NOTE: On some operation systems rubygems are included in the ruby package
 
@@ -40,7 +40,7 @@ git add *
 git commit -a -m "initial commit"
 ```
 
-### Step 2: Create `stremio-addon.rb` and `config.ru`
+## Step 2: Create `stremio-addon.rb` and `config.ru`
 
 Let's start with our add-on basic functionality. Create `stremio-addon.rb` with the following contents:
 
@@ -84,7 +84,7 @@ class Resource
     segments = env["PATH_INFO"][1..-1] # Remove the leading slash
       .sub(/\.\w+$/, '') # Remove extension if any
       .split("/")
-      .map{ |seg| URI.decode(seg) }
+      .map { |seg| URI.decode(seg) }
 
     { type: segments[0], id: segments[1], extraArgs: segments[2..-1] }
   end
@@ -380,17 +380,13 @@ class Meta < Resource
     args = parse_request(env)
     return @app.call(env) unless CATALOG.key?(args[:type])
 
-    item = CATALOG[args[:type]]
-      .select{ |item| item[:id] == args[:id] }
-      .first
+    item = CATALOG[args[:type]].detect { |item| item[:id] == args[:id] }
 
-    meta = {
-      meta: nil
-    }
+    meta = { meta: nil }
 
     unless item.nil? then
       # Build the meta info
-      meta[:meta]= {
+      meta[:meta] = {
         id: item[:id],
         type: args[:type],
         name: item[:name],
@@ -399,7 +395,7 @@ class Meta < Resource
       }
 
       # Populate optional values
-      OPTIONAL_META.each{ |tag| meta[:meta][tag] = item[tag] if item.key?(tag) }
+      OPTIONAL_META.each { |tag| meta[:meta][tag] = item[tag] if item.key?(tag) }
     end
 
     [200, @@headers, [meta.to_json]]

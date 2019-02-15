@@ -119,7 +119,7 @@ class Resource
     segments = env["PATH_INFO"][1..-1] # Remove the leading slash
       .sub(/\.\w+$/, '') # Remove extension if any
       .split("/")
-      .map{ |seg| URI.decode(seg) }
+      .map { |seg| URI.decode(seg) }
 
     { type: segments[0], id: segments[1], extraArgs: segments[2..-1] }
   end
@@ -159,17 +159,13 @@ class Meta < Resource
     args = parse_request(env)
     return @app.call(env) unless CATALOG.key?(args[:type])
 
-    item = CATALOG[args[:type]]
-      .select{ |item| item[:id] == args[:id] }
-      .first
+    item = CATALOG[args[:type]].detect { |item| item[:id] == args[:id] }
 
-    meta = {
-      meta: nil
-    }
+    meta = { meta: nil }
 
     unless item.nil? then
       # Build the meta info
-      meta[:meta]= {
+      meta[:meta] = {
         id: item[:id],
         type: args[:type],
         name: item[:name],
@@ -178,7 +174,7 @@ class Meta < Resource
       }
 
       # Populate optional values
-      OPTIONAL_META.each{ |tag| meta[:meta][tag] = item[tag] if item.key?(tag) }
+      OPTIONAL_META.each { |tag| meta[:meta][tag] = item[tag] if item.key?(tag) }
     end
 
     [200, @@headers, [meta.to_json]]
@@ -197,4 +193,3 @@ class Stream < Resource
     [200, @@headers, [streams.to_json]]
   end
 end
-
